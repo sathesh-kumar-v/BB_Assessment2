@@ -14,10 +14,16 @@ function buildDocKey(doc) {
 exports.getConfig = async (req, res) => {
   try {
     const doc = await Document.findById(req.params.id);
-    if (!doc || doc.isDeleted) return res.status(404).json({ message: 'Document not found' });
+    if (!doc || doc.isDeleted) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
 
-    const fileUrlForDS = `${process.env.APP_PUBLIC_BASE}/uploads/${doc.versions[doc.versions.length-1].filename}`;
-    const callbackUrl  = `${process.env.APP_PUBLIC_BASE}/api/onlyoffice/callback/${doc._id}`;
+    // ✅ Make sure APP_PUBLIC_BASE is host.docker.internal:5000
+    const baseUrl = process.env.APP_PUBLIC_BASE;
+
+    const latestFile = doc.versions[doc.versions.length - 1];
+    const fileUrlForDS = `${baseUrl}/uploads/${latestFile.filename}`;
+    const callbackUrl  = `${baseUrl}/api/onlyoffice/callback/${doc._id}`;
 
     let documentType = 'text';
     if (/spreadsheet/i.test(doc.mimeType)) documentType = 'spreadsheet';
@@ -29,12 +35,7 @@ exports.getConfig = async (req, res) => {
         key: `${doc._id}-${doc.updatedAt.getTime()}`,
         title: doc.name,
         url: fileUrlForDS,
-        permissions: {
-          download: true,
-          print: true,
-          edit: true,
-          comment: true
-        }
+        permissions: { download: true, print: true, edit: true, comment: true }
       },
       editorConfig: {
         mode: 'edit',
@@ -42,20 +43,22 @@ exports.getConfig = async (req, res) => {
         user: {
           id: String(req.user?._id || 'guest'),
           name: req.user?.name || 'Guest'
-        }
+        },
+        customization: {}
       }
     };
 
-    // Sign config
+    // ✅ Sign config
     const token = jwt.sign(config, process.env.ONLYOFFICE_JWT_SECRET);
 
-    // ⚠️ Embed token inside config too
     config.token = token;
+    config.document.jwt = token;
+    config.editorConfig.token = token;
 
     res.json({
       config,
       token,
-      docServerApiJs: `http://host.docker.internal:8085/web-apps/apps/api/documents/api.js`
+      docServerApiJs: `${process.env.ONLYOFFICE_DS_URL}/web-apps/apps/api/documents/api.js`
     });
   } catch (err) {
     console.error(err);
@@ -140,18 +143,21 @@ exports.getEditorConfig = (req, res) => {
       user: {
         id: req.user._id.toString(),
         name: req.user.name
-      }
-    },
-    token: null,
+      },
+      customization: {}
+    }
   };
 
+  // ✅ Sign config
   const token = jwt.sign(config, process.env.ONLYOFFICE_JWT_SECRET);
 
-  // ✅ Attach token inside config (browser requires it)
+  // ✅ Embed token everywhere
   config.token = token;
+  config.document.jwt = token;
+  config.editorConfig.token = token;
 
   res.json({
     config,
-    docServerApiJs: "http://localhost:8080/web-apps/apps/api/documents/api.js"
-});
+    docServerApiJs: `${process.env.ONLYOFFICE_DS_URL}/web-apps/apps/api/documents/api.js`
+  });
 };

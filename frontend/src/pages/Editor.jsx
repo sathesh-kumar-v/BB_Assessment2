@@ -1,14 +1,15 @@
+// src/pages/Editor.jsx
 import { useEffect, useState, useContext } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Editor() {
   const { id } = useParams();
-  const location = useLocation();
   const { user } = useContext(AuthContext);
   const userRole = user?.role?.toLowerCase();
   const [config, setConfig] = useState(null);
+  const [docServerApiJs, setDocServerApiJs] = useState(null);
 
   // Determine mode based on role
   const mode = userRole === "viewer" ? "view" : "edit";
@@ -16,32 +17,29 @@ export default function Editor() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
+        const token = localStorage.getItem("token"); // stored at login
         const res = await axios.get(`/api/onlyoffice/config/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           withCredentials: true,
         });
 
-        // Inject view/edit mode based on user role
-        const editorConfig = {
-          ...res.data.config,
-          editorConfig: {
-            ...res.data.config.editorConfig,
-            mode: mode, // "edit" or "view"
-          },
-        };
-
-        setConfig(editorConfig);
+        // ✅ backend sends { config, token, docServerApiJs }
+        setConfig(res.data.config);
+        setDocServerApiJs(res.data.docServerApiJs);
       } catch (err) {
         console.error("Error loading editor config", err);
       }
     };
 
     fetchConfig();
-  }, [id, mode]);
+  }, [id]);
 
   useEffect(() => {
-    if (config) {
+    if (config && docServerApiJs) {
       const script = document.createElement("script");
-      script.src = "http://localhost:8080/web-apps/apps/api/documents/api.js"; // OnlyOffice API
+      script.src = docServerApiJs; // ✅ now we have it in state
       script.async = true;
       script.onload = () => {
         if (window.DocsAPI) {
@@ -56,7 +54,7 @@ export default function Editor() {
         document.body.removeChild(script);
       };
     }
-  }, [config]);
+  }, [config, docServerApiJs]);
 
   if (!config) {
     return <p className="text-gray-500 p-4">Loading editor...</p>;
@@ -64,6 +62,7 @@ export default function Editor() {
 
   return (
     <div className="w-screen h-screen">
+      {/* ✅ Editor container */}
       <div id="onlyoffice-editor" style={{ width: "100%", height: "100vh" }} />
     </div>
   );

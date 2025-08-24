@@ -23,8 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 // static file serving for uploaded files
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-app.use('/versions', express.static(path.join(process.cwd(), 'versions')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/versions', express.static(path.join(__dirname, 'versions')));
 
 // routes
 app.use('/api/auth', authRoutes);
