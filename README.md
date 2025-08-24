@@ -1,6 +1,3 @@
-An attractive README file should be well-structured, easy to read, and provide all the necessary information for a user to understand, set up, and run the project. Here is a polished version of the README you provided, formatted for GitHub.
-
------
 
 # BB\_Assessment2
 
