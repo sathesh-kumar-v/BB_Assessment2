@@ -14,7 +14,7 @@ export default function Login() {
     setLoading(true)
     const res = await login(email, password)
     setLoading(false)
-    if (res.ok) nav('/')   // 👈 safer: redirect to dashboard instead of root
+    if (res.ok) nav('/') 
     else alert(res.message || 'Login failed')
   }
 

@@ -16,7 +16,7 @@ export default function AppRoutes() {
 
       {/* Protected routes (must wrap children inside Outlet) */}
       <Route element={<ProtectedRoute />}>
-        <Route index element={<Dashboard />} />   {/* ✅ default when "/" */}
+        <Route index element={<Dashboard />} /> 
         <Route path="/editor/:id" element={<Editor />} />
       </Route>
 

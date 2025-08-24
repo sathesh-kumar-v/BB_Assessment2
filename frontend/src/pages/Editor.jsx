@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Editor() {
   const { id } = useParams();
   const location = useLocation();
-  const mode = new URLSearchParams(location.search).get("mode") || "edit";
+  const { user } = useContext(AuthContext);
+  const userRole = user?.role?.toLowerCase();
   const [config, setConfig] = useState(null);
+
+  // Determine mode based on role
+  const mode = userRole === "viewer" ? "view" : "edit";
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -15,12 +20,12 @@ export default function Editor() {
           withCredentials: true,
         });
 
-        // inject view/edit mode
+        // Inject view/edit mode based on user role
         const editorConfig = {
           ...res.data.config,
           editorConfig: {
             ...res.data.config.editorConfig,
-            mode: mode === "view" ? "view" : "edit",
+            mode: mode, // "edit" or "view"
           },
         };
 
@@ -36,7 +41,7 @@ export default function Editor() {
   useEffect(() => {
     if (config) {
       const script = document.createElement("script");
-      script.src = "http://localhost:8080/web-apps/apps/api/documents/api.js";
+      script.src = "http://localhost:8080/web-apps/apps/api/documents/api.js"; // OnlyOffice API
       script.async = true;
       script.onload = () => {
         if (window.DocsAPI) {

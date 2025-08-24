@@ -2,16 +2,22 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteDocument, updateDocument } from "../services/documentService";
 
-export default function DocumentList({ documents, setDocuments }) {
+export default function DocumentList({ documents, setDocuments, userRole }) {
   const [editingDoc, setEditingDoc] = useState(null);
   const [newName, setNewName] = useState("");
   const [newFile, setNewFile] = useState(null);
   const navigate = useNavigate();
 
+  // Role permissions
+  const canRenameReplace = ['editor', 'admin'].includes(userRole);
+  const canEdit = ['editor', 'admin'].includes(userRole);
+  const canDelete = userRole === 'admin';
+  const canView = ['viewer', 'editor', 'admin'].includes(userRole);
+
   // Delete doc
   const handleDelete = async (id) => {
     await deleteDocument(id);
-    setDocuments((prev) => prev.filter((doc) => doc._id !== id));
+    setDocuments(prev => prev.filter(doc => doc._id !== id));
   };
 
   // Update doc
@@ -24,29 +30,20 @@ export default function DocumentList({ documents, setDocuments }) {
     if (newFile) formData.append("file", newFile);
 
     const updated = await updateDocument(editingDoc._id, formData);
+    setDocuments(prev => prev.map(d => (d._id === updated._id ? updated : d)));
 
-    // update local state
-    setDocuments((prev) =>
-      prev.map((d) => (d._id === updated._id ? updated : d))
-    );
-
-    // reset modal
     setEditingDoc(null);
     setNewName("");
     setNewFile(null);
   };
 
-  // Open document in editor mode
   const handleEditor = (doc) => {
     navigate(`/editor/${doc._id}?mode=edit`);
   };
 
-  // Open document in view-only mode
-// Open document directly from uploads folder
-const handleView = (doc) => {
-  window.open(`http://localhost:5000${doc.path}`, "_blank");
-};
-
+  const handleView = (doc) => {
+    window.open(`http://localhost:5000${doc.path}`, "_blank");
+  };
 
   return (
     <div>
@@ -61,46 +58,54 @@ const handleView = (doc) => {
           </tr>
         </thead>
         <tbody>
-          {documents.map((doc) => (
+          {documents.map(doc => (
             <tr key={doc._id} className="text-center">
               <td className="p-2 border">{doc.name}</td>
               <td className="p-2 border">{doc.mimeType}</td>
               <td className="p-2 border">{doc.uploadedBy?.name}</td>
-              <td className="p-2 border">
-                {new Date(doc.updatedAt).toLocaleString()}
-              </td>
+              <td className="p-2 border">{new Date(doc.updatedAt).toLocaleString()}</td>
               <td className="p-2 border flex gap-2 justify-center">
-                {/* 1. Rename/Replace */}
-                <button
-                  onClick={() => setEditingDoc(doc)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
-                >
-                  Rename/Replace
-                </button>
 
-                {/* 2. Editor */}
-                <button
-                  onClick={() => handleEditor(doc)}
-                  className="bg-green-500 text-white px-2 py-1 rounded"
-                >
-                  Editor
-                </button>
+                {/* Rename/Replace */}
+                {canRenameReplace && (
+                  <button
+                    onClick={() => setEditingDoc(doc)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                  >
+                    Rename/Replace
+                  </button>
+                )}
 
-                {/* 3. Delete */}
-                <button
-                  onClick={() => handleDelete(doc._id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                >
-                  Delete
-                </button>
+                {/* Editor */}
+                {canEdit && (
+                  <button
+                    onClick={() => handleEditor(doc)}
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                  >
+                    Editor
+                  </button>
+                )}
 
-                {/* 4. View */}
-                <button
-                  onClick={() => handleView(doc)}
-                  className="bg-gray-700 text-white px-2 py-1 rounded"
-                >
-                  View
-                </button>
+                {/* Delete */}
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(doc._id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                )}
+
+                {/* View */}
+                {canView && (
+                  <button
+                    onClick={() => handleView(doc)}
+                    className="bg-gray-700 text-white px-2 py-1 rounded"
+                  >
+                    View
+                  </button>
+                )}
+
               </td>
             </tr>
           ))}
@@ -108,15 +113,10 @@ const handleView = (doc) => {
       </table>
 
       {/* Rename/Replace Modal */}
-      {editingDoc && (
+      {editingDoc && canRenameReplace && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <form
-            onSubmit={handleUpdate}
-            className="bg-white p-6 rounded shadow w-96"
-          >
-            <h2 className="text-lg font-bold mb-4">
-              Rename/Replace {editingDoc.name}
-            </h2>
+          <form onSubmit={handleUpdate} className="bg-white p-6 rounded shadow w-96">
+            <h2 className="text-lg font-bold mb-4">Rename/Replace {editingDoc.name}</h2>
 
             <input
               type="text"
@@ -133,23 +133,13 @@ const handleView = (doc) => {
             />
 
             <div className="flex gap-2">
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-3 py-1 rounded"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditingDoc(null)}
-                className="bg-gray-400 px-3 py-1 rounded"
-              >
-                Cancel
-              </button>
+              <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
+              <button type="button" onClick={() => setEditingDoc(null)} className="bg-gray-400 px-3 py-1 rounded">Cancel</button>
             </div>
           </form>
         </div>
       )}
+
     </div>
   );
 }

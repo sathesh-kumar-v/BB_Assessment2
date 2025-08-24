@@ -10,27 +10,4 @@ router.get('/config/:id', auth, authorizeRoles('admin','editor','viewer'), onlyo
 // Callback receiver (DocumentServer -> your backend)
 router.post('/callback/:id', onlyofficeController.callback);
 
-
-// router.post("/config", (req, res) => {
-//   const { fileUrl, fileName } = req.body;
-
-//   const config = {
-//     document: {
-//       fileType: fileName.split(".").pop(),
-//       title: fileName,
-//       url: `http://host.docker.internal:5000/${document.fileName}`,
-//     },
-//     editorConfig: {
-//       callbackUrl: "`http://host.docker.internal:5000/api/onlyoffice/callback/${doc._id}`", // receives save updates
-//     },
-//   };
-
-//   res.json({
-//     editorUrl: `http://localhost:8080/office?config=${encodeURIComponent(
-//       JSON.stringify(config)
-//     )}`,
-//   });
-// });
-
-
 module.exports = router;

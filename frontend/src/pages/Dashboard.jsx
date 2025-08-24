@@ -1,43 +1,44 @@
-import { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext'
-import { listDocuments } from '../services/documentService'
-import DocumentList from '../components/DocumentList'
-import UploadForm from '../components/UploadForm'
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { listDocuments } from '../services/documentService';
+import DocumentList from '../components/DocumentList';
+import UploadForm from '../components/UploadForm';
 
 export default function Dashboard() {
-  const { user, logout } = useContext(AuthContext)
-  const [documents, setDocuments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const { user, logout } = useContext(AuthContext);
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const userRole = user?.role?.toLowerCase();
 
   useEffect(() => {
     const fetchDocs = async () => {
       try {
-        setLoading(true)
-        const res = await listDocuments()
-        setDocuments(res?.docs || [])
+        setLoading(true);
+        const res = await listDocuments();
+        setDocuments(res?.docs || []);
       } catch (err) {
-        console.error('Failed to fetch documents', err)
+        console.error('Failed to fetch documents', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchDocs()
-  }, [])
+    };
+    fetchDocs();
+  }, []);
 
   const handleLogout = () => {
-    logout()
-    navigate('/login') // 👈 redirect to login page
-  }
+    logout();
+    navigate('/login');
+  };
+
+  const canUpload = ['admin', 'editor', 'viewer'].includes(userRole);
 
   return (
     <div className="p-6">
-      {/* Top bar with Welcome + Logout */}
+      {/* Top bar */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">
-          Welcome, {user?.name || 'User'}
-        </h1>
+        <h1 className="text-2xl font-bold">Welcome, {user?.name || 'User'}</h1>
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
@@ -46,10 +47,8 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Show Upload Button for Admin/Editor */}
-      {['admin', 'editor'].includes(user?.role?.toLowerCase()) && (
-        <UploadForm setDocuments={setDocuments} />
-      )}
+      {/* Upload Button */}
+      {canUpload && <UploadForm setDocuments={setDocuments} />}
 
       {/* Documents Section */}
       {loading ? (
@@ -58,7 +57,7 @@ export default function Dashboard() {
         <div className="text-center py-10 text-gray-500">
           <p className="text-lg font-semibold mb-2">No documents found</p>
           <p className="italic mb-4">
-            {user?.role === 'admin' || user?.role === 'editor'
+            {['admin', 'editor'].includes(userRole)
               ? 'Upload your first document using the form above.'
               : 'Please check back later.'}
           </p>
@@ -79,8 +78,8 @@ export default function Dashboard() {
           </div>
         </div>
       ) : (
-        <DocumentList documents={documents} setDocuments={setDocuments} />
+        <DocumentList documents={documents} setDocuments={setDocuments} userRole={userRole} />
       )}
     </div>
-  )
+  );
 }
