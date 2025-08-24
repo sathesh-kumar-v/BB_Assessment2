@@ -1,224 +1,164 @@
-# BB_Assessment2
-Assessment 2
 
-Document Manager + ONLYOFFICE Integration (MERN)
+# BB\_Assessment2
 
-A full-stack document management app with authentication, role-based access, versioned uploads, and deep integration with ONLYOFFICE Document Server for in-browser editing. Users can upload, rename/replace, view, and edit documents; changes made in the editor are saved back to the server as new versions.
+## Document Manager + ONLYOFFICE Integration (MERN)
 
-Table of Contents
+A full-stack document management application built with the MERN stack, featuring robust authentication, role-based access control, versioned document uploads, and a deep, seamless integration with ONLYOFFICE Document Server for in-browser editing. Users can effortlessly upload, rename, replace, view, and edit documents. Changes made in the ONLYOFFICE editor are automatically saved back to the server, creating a new version of the document.
 
-Tech Stack
+-----
 
-Features
+### Table of Contents
 
-Architecture & Flow
+  - [Tech Stack](https://www.google.com/search?q=%23tech-stack)
+  - [Features](https://www.google.com/search?q=%23features)
+  - [Architecture & Flow](https://www.google.com/search?q=%23architecture--flow)
+  - [Directory Structure](https://www.google.com/search?q=%23directory-structure)
+  - [Local Setup — Step by Step](https://www.google.com/search?q=%23local-setup--step-by-step)
+      - [Prerequisites](https://www.google.com/search?q=%23prerequisites)
+      - [1) Start ONLYOFFICE Document Server (Docker)](https://www.google.com/search?q=%231-start-onlyoffice-document-server-docker)
+      - [2) Start MongoDB](https://www.google.com/search?q=%232-start-mongodb)
+      - [3) Backend Setup](https://www.google.com/search?q=%233-backend-setup)
+      - [4) Frontend Setup](https://www.google.com/search?q=%234-frontend-setup)
+      - [5) Log in & Try It](https://www.google.com/search?q=%235-log-in--try-it)
+  - [Key Implementation Details](https://www.google.com/search?q=%23key-implementation-details)
+  - [API Overview](https://www.google.com/search?q=%23api-overview)
+  - [Troubleshooting](https://www.google.com/search?q=%23troubleshooting)
+  - [Security Notes](https://www.google.com/search?q=%23security-notes)
 
-Directory Structure
+-----
 
-Backend: Environment Variables
+### Tech Stack
 
-Frontend: Environment Variables
+  - **Frontend:** React, React Router, TailwindCSS, Axios, Context API (for Auth)
+  - **Backend:** Node.js, Express, Mongoose (MongoDB), Multer (file uploads), JWT
+  - **Editor:** ONLYOFFICE Document Server (via Docker)
+  - **Database:** MongoDB
 
-Local Setup — Step by Step
+### Features
 
-Prerequisites
+#### Authentication & Authorization
 
-1) Start ONLYOFFICE Document Server (Docker)
+  - User registration and login.
+  - Protected routes on both the frontend (using `ProtectedRoute`) and backend (using `auth` middleware).
+  - Role-based access control with distinct roles: `admin`, `editor`, and `viewer`.
 
-2) Start MongoDB
+#### Document Management
 
-3) Backend Setup
+  - Upload documents, with files stored on disk (`/uploads`) and metadata + versions in MongoDB.
+  - A clear document list showing: `Name`, `MIME type`, `Uploaded by`, and `Last modified timestamp`.
+  - Comprehensive actions for each document:
+      - **Rename/Replace:** Change the document's name or upload a new file to create a new version.
+      - **Editor:** Open the document directly in the ONLYOFFICE editor for in-browser editing.
+      - **Delete:** Remove the document (supports soft/hard delete based on implementation).
+      - **View:** Open the raw file URL in a new tab for direct viewing.
 
-4) Frontend Setup
+#### ONLYOFFICE Integration
 
-5) Log in & Try It
+  - A dedicated backend endpoint (`GET /api/onlyoffice/config/:id`) to return a signed JWT configuration for the ONLYOFFICE editor.
+  - The frontend dynamically loads the ONLYOFFICE SDK (`api.js`) and initializes the editor using the signed config.
+  - The backend endpoint (`POST /api/onlyoffice/callback/:id`) receives save events from the ONLYOFFICE Document Server, downloads the updated file, and creates a new version in the database.
 
-Key Implementation Details
+-----
 
-ONLYOFFICE Config Endpoint
+### Architecture & Flow
 
-Editor Page (React)
+1.  **User Authentication:** A user logs in and receives a JWT for session management. This token is used by the frontend to secure API calls.
+2.  **Dashboard:** The dashboard lists all documents by fetching data from the backend.
+3.  **Editing Flow:**
+      - Clicking the `Editor` action triggers a frontend call to `GET /api/onlyoffice/config/:id`.
+      - The backend loads the document, builds a configuration object, signs it with `ONLYOFFICE_JWT_SECRET`, and returns it to the frontend.
+      - The React component loads the ONLYOFFICE SDK and initializes the editor with the signed configuration.
+4.  **Saving Edits:**
+      - When the user saves their changes in ONLYOFFICE, the Document Server calls the backend endpoint `POST /api/onlyoffice/callback/:id`.
+      - The backend verifies the JWT from the Document Server, downloads the updated file, saves it, and creates a new version entry in the MongoDB database.
 
-Dashboard & Document List Actions
+> **Important networking note:** The ONLYOFFICE Document Server (running in a Docker container) must be able to reach your backend to download the document and call back. On Windows/Mac Docker, use `http://host.docker.internal:5000` as the public base URL in your backend configuration.
 
-API Overview
+-----
 
-Troubleshooting
+### Directory Structure
 
-Security Notes
-
-Tech Stack
-
-Frontend: React, React Router, TailwindCSS, Axios, Context API (Auth)
-
-Backend: Node.js, Express, Mongoose (MongoDB), Multer (uploads), JWT
-
-Editor: ONLYOFFICE Document Server (Docker)
-
-Database: MongoDB
-
-Auth & Roles: auth middleware + authorizeRoles('admin','editor','viewer')
-
-Features
-Authentication & Authorization
-
-User registration & login.
-
-Protected routes on both frontend (React ProtectedRoute) and backend (auth middleware).
-
-Role-based access: admin, editor, viewer.
-
-Document Management
-
-Upload documents (stores file on disk in /uploads, metadata + versions in MongoDB).
-
-List documents with:
-
-Name
-
-MIME type
-
-Uploaded by
-
-Last modified timestamp
-
-Actions per document:
-
-Rename/Replace – change name or upload a new file version.
-
-Editor – open the file in ONLYOFFICE editor (/editor/:id?mode=edit).
-
-Delete – remove the document (soft/hard delete as implemented).
-
-View – open the raw file URL (http://localhost:5000/uploads/<file>).
-
-ONLYOFFICE Integration
-
-GET /api/onlyoffice/config/:id returns a signed config (JWT) for the editor.
-
-Editor loads api.js from Document Server and initializes DocsAPI.DocEditor.
-
-POST /api/onlyoffice/callback/:id receives save events from Document Server, downloads the updated file, and creates a new version in MongoDB.
-
-Architecture & Flow
-
-User logs in → receives session/JWT used by the frontend (withCredentials or Authorization header).
-
-Dashboard lists docs via backend.
-
-Clicking Editor:
-
-Frontend calls GET /api/onlyoffice/config/:id (protected).
-
-Backend returns a config object + embedded JWT token (signed with ONLYOFFICE_JWT_SECRET).
-
-React page loads Document Server’s api.js and initializes the editor with that config.
-
-When the user saves in ONLYOFFICE:
-
-Document Server calls POST /api/onlyoffice/callback/:id.
-
-Backend verifies JWT, downloads the updated file, stores a new version, and updates metadata.
-
-Clicking View:
-
-Frontend opens http://localhost:5000/uploads/<file> directly in a new tab (no ONLYOFFICE).
-
-Important networking note: Document Server (running in Docker) must be able to reach your backend to download the document and call back. On Windows/Mac Docker, use http://host.docker.internal:5000 in backend config as the public base for file URLs and callbacks.
-
-Directory Structure
-
+```
 project-root/
 ├─ backend/
 │  ├─ controllers/
-│  │  └─ onlyoffice.controller.js
 │  ├─ middleware/
-│  │  ├─ auth.middleware.js
-│  │  └─ role.middleware.js
 │  ├─ models/
-│  │  └─ Document.model.js
 │  ├─ routes/
-│  │  ├─ onlyoffice.routes.js
-│  │  └─ document.routes.js (upload/list/update/delete)
-│  ├─ uploads/                # static files served to clients & Document Server
-│  ├─ .env
-│  └─ server.js (Express boot)
+│  ├─ uploads/                # Static directory for document files
+│  ├─ .env                    # Environment variables for the backend
+│  └─ server.js
 ├─ frontend/
 │  ├─ src/
-│  │  ├─ pages/ (Login, Register, Dashboard, Editor)
-│  │  ├─ components/ (DocumentList, UploadForm, ProtectedRoute)
-│  │  ├─ routes/AppRoutes.jsx
-│  │  └─ context/AuthContext.jsx
-│  ├─ .env
-│  └─ dev server config (Vite/CRA)
-└─ docker/ (optional helpers)
+│  │  ├─ pages/ (Login, Dashboard, Editor)
+│  │  ├─ components/ (DocumentList, ProtectedRoute)
+│  │  ├─ context/ (AuthContext)
+│  │  └─ routes/AppRoutes.jsx
+│  ├─ .env                    # Environment variables for the frontend
+│  └─ package.json
+└─ docker/ (optional helper scripts)
+```
 
+-----
 
-Backend: Environment Variables
+### Local Setup — Step by Step
 
-Create backend/.env:
+#### Prerequisites
 
-# Server
+  - [Node.js](https://nodejs.org/) (version 18+) & `npm`
+  - [MongoDB](https://www.mongodb.com/) (local installation or [MongoDB Atlas](https://www.google.com/search?q=https://www.mongodb.com/cloud/atlas/lp/try2%3Futm_source%3Dgoogle%26utm_campaign%3Dgbl.ww.all.dev.core.brand.exact%26utm_term%3Dmongodb%26utm_medium%3Dcpc_ads%26utm_content%3DB%26gad_source%3D1%26gclid%3DCj0KCQjwhfjpBhCmARIsAG-KyPmLbS5y_4f_2uL4B2Ym1j9B9f3d9B6W1hM7F8f-9d3g4n3f4i0m5r6f3) account)
+  - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (required for ONLYOFFICE)
+
+#### Backend: Environment Variables
+
+Create a file named `.env` in the `backend/` directory with the following content:
+
+```ini
+# Server Configuration
 PORT=5000
 NODE_ENV=development
 
 # Database
 MONGO_URI=mongodb+srv://skumarva1999:Sk.v.a1999@cluster0.5ky1gwz.mongodb.net/pdf
 
-# App Auth (your app's own JWT for user login)
+# App Auth (for user login)
 JWT_SECRET=super_app_secret
 
 # CORS (frontend origin)
 CORS_ORIGIN=http://localhost:3000
 
-# File uploads
+# File Uploads
 UPLOAD_DIR=uploads
 MAX_UPLOAD_SIZE=50mb
 
-# ONLYOFFICE
-# IMPORTANT: When Document Server runs in Docker on Windows/Mac, it reaches your host via host.docker.internal
-# For Linux, see the note below in "Troubleshooting".
+# ONLYOFFICE Integration
+# This URL MUST be reachable from inside the ONLYOFFICE Docker container.
+# For Windows/Mac Docker, use host.docker.internal.
 APP_PUBLIC_BASE=http://host.docker.internal:5000
 
-# Where the Document Server is accessible from the browser
+# The URL where ONLYOFFICE Document Server is accessible from your browser.
 ONLYOFFICE_DS_URL=http://localhost:8080
 
-# Must match the Document Server container env JWT_SECRET
+# The secret key for JWT signing; MUST match the Document Server's JWT_SECRET.
 ONLYOFFICE_JWT_SECRET=mysecret123
+```
 
+#### Frontend: Environment Variables
 
-Notes
+Create a file named `.env` in the `frontend/` directory:
 
-APP_PUBLIC_BASE must be reachable from inside the Document Server container (not just from your browser).
-
-Windows/Mac Docker: http://host.docker.internal:5000 ✅
-
-Linux: use the host IP or run the container with --add-host=host.docker.internal:host-gateway and keep host.docker.internal.
-
-ONLYOFFICE_DS_URL is what your browser uses to load api.js.
-
-Frontend: Environment Variables
-
-Create frontend/.env (if you rely on an axios base URL):
-
+```ini
 # Vite example
 VITE_API_BASE=http://localhost:5000
+```
 
-Or keep relative paths (as in your current code) and set a dev proxy so /api goes to http://localhost:5000 (and enable CORS on the backend).
+> Alternatively, you can configure a dev proxy in your `vite.config.js` or `package.json` to route `/api` requests to the backend.
 
-Local Setup — Step by Step
-Prerequisites
+#### 1\) Start ONLYOFFICE Document Server (Docker)
 
-Node.js 18+ & npm
+Pull and run the container with JWT enabled:
 
-MongoDB (local or Atlas)
-
-Docker Desktop (for ONLYOFFICE)
-
-1) Start ONLYOFFICE Document Server (Docker)
-
-Pull & run:
-
+```bash
 docker pull onlyoffice/documentserver
 
 docker run -it -d -p 8080:80 \
@@ -226,524 +166,111 @@ docker run -it -d -p 8080:80 \
   -e JWT_SECRET=mysecret123 \
   --name onlyoffice \
   onlyoffice/documentserver
+```
 
-Verify it serves the SDK:
+> **Verification:** To ensure it's running correctly, open `http://localhost:8080/web-apps/apps/api/documents/api.js` in your browser. You should see JavaScript code.
 
-Open http://localhost:8080/web-apps/apps/api/documents/api.js
- in your browser.
-You should see JavaScript (no 404).
+#### 2\) Start MongoDB
 
-If you’re on Linux, and you want host.docker.internal to resolve inside the container, run:
+Start your local MongoDB daemon, or ensure your `MONGO_URI` is correctly configured for your MongoDB Atlas instance.
 
-docker run -it -d -p 8080:80 \
-  -e JWT_ENABLED=true \
-  -e JWT_SECRET=mysecret123 \
-  --add-host=host.docker.internal:host-gateway \
-  --name onlyoffice \
-  onlyoffice/documentserver
+#### 3\) Backend Setup
 
-2) Start MongoDB
-
-Local Mongo:
-mongod
-
-3) Backend Setup
+```bash
 cd backend
-cp .env.example .env            # if you have an example file; otherwise create .env as above
 npm install
-mkdir -p uploads                # ensure upload directory exists and is writable
-npm run dev                     # or: npm start
+mkdir -p uploads                # Ensure the upload directory exists
+npm run dev
+```
 
-Expected logs:
+You should see logs indicating the server is running on `port 5000` and `MongoDB connected`.
 
-Server listening on port 5000
+#### 4\) Frontend Setup
 
-MongoDB connected
-
-Static /uploads being served
-
-4) Frontend Setup
+```bash
 cd ../frontend
 npm install
-npm run dev     # Vite
+npm run dev     # for Vite
 # or
-npm start       # CRA
+npm start       # for Create React App
+```
 
-Frontend runs at http://localhost:3000
-.
+The frontend will run at `http://localhost:3000`.
 
-5) Log in & Try It
+#### 5\) Log in & Try It
 
-Register & log in (or seed a user).
+  - Navigate to the registration page and create a new user.
+  - Log in with your new user credentials.
+  - Go to the dashboard.
+  - Upload a document and test the various actions: **Rename/Replace**, **Editor**, **Delete**, and **View**.
 
-Go to Dashboard.
+-----
 
-Upload a document.
+### Key Implementation Details
 
-Use Actions:
+#### ONLYOFFICE Config Endpoint
 
-Rename/Replace → change name or file.
+  - **Route:** `GET /api/onlyoffice/config/:id`
+  - This endpoint is protected by `auth` and `authorizeRoles` middleware.
+  - It fetches the document by its ID and constructs the ONLYOFFICE configuration object, including the `document.url` (using `APP_PUBLIC_BASE`) and the `editorConfig.callbackUrl`.
+  - The entire configuration object is then signed with the `ONLYOFFICE_JWT_SECRET`, and the token is embedded as `config.token`.
 
-Editor → opens /editor/:id?mode=edit, loads ONLYOFFICE editor.
+#### Dashboard & Document List Actions
 
-Delete → removes the document.
+  - **Rename/Replace:** Handled via a modal that calls a `PATCH` request to the backend.
+  - **Editor:** A simple navigation using `react-router`: `Maps("/editor/" + doc._id + "?mode=edit")`.
+  - **View:** Opens the raw file directly in a new tab, bypassing the ONLYOFFICE editor.
 
-View → opens http://localhost:5000/uploads/<file> in a new tab.
+-----
 
-Key Implementation Details
-ONLYOFFICE Config Endpoint
+### API Overview
 
-Route: GET /api/onlyoffice/config/:id (protected by auth + authorizeRoles)
+All routes are prefixed with `/api`.
 
-Loads Document by id.
+#### Auth Routes
 
-Builds config:
+  - `POST /auth/register`: Create a new user.
+  - `POST /auth/login`: Authenticate and log in a user.
+  - `POST /auth/logout`: Log out a user.
 
-document.url → must be reachable by the Docker container (use APP_PUBLIC_BASE).
+#### Document Routes (Protected)
 
-editorConfig.callbackUrl → where DS posts save events.
+  - `GET /documents`: List all documents.
+  - `POST /documents`: Upload a new document (roles: `admin`, `editor`).
+  - `PATCH /documents/:id`: Rename or replace a document.
+  - `DELETE /documents/:id`: Delete a document.
+  - `GET /uploads/:file`: Serve the static file (public access).
 
-Signs the entire config with ONLYOFFICE_JWT_SECRET and embeds config.token.
+#### ONLYOFFICE Routes (Protected)
 
-Example (simplified):
+  - `GET /onlyoffice/config/:id`: Returns the signed editor configuration (roles: `admin`, `editor`, `viewer`).
+  - `POST /onlyoffice/callback/:id`: Receives save events from ONLYOFFICE.
 
-Key Implementation Details
+-----
 
-Dashboard & Document List Actions
+### Troubleshooting
 
-Rename/Replace → Opens a modal to update name or file (uses updateDocument).
+  - **`{"message":"Authorization required"}` in the editor tab:**
 
-Editor → navigate("/editor/" + doc._id + "?mode=edit")
+      - Ensure `JWT_ENABLED=true` and `JWT_SECRET=mysecret123` are correctly set in both your Docker run command and the backend `.env` file.
+      - Verify that the backend is correctly signing the config object before sending it to the frontend.
 
-Delete → Calls deleteDocument.
+  - **`DocsAPI is not defined`:**
 
-View → Opens raw file directly (no ONLYOFFICE):
+      - Confirm that `http://localhost:8080/web-apps/apps/api/documents/api.js` loads in your browser.
+      - Check that the script tag for `api.js` is correctly placed and loads before the call to `new DocsAPI.DocEditor(...)`.
 
-API Overview
+  - **Document Server cannot download the file or call back:**
 
-Paths are prefixed with /api.
+      - This is a common issue with Docker networking. Ensure your `APP_PUBLIC_BASE` is correctly set.
+      - For Windows/Mac Docker, use `http://host.docker.internal:5000`.
+      - For Linux, you may need to use `--add-host=host.docker.internal:host-gateway` in your `docker run` command or use your host's IP address.
 
-Auth
+-----
 
-POST /auth/register – create user
+### Security Notes
 
-POST /auth/login – login (returns cookie or JWT)
-
-POST /auth/logout – logout
-
-Documents
-
-GET /documents – list documents (protected)
-
-POST /documents – upload (protected; admin/editor)
-
-PATCH /documents/:id – rename/replace (protected; role-checked)
-
-DELETE /documents/:id – delete (protected; role-checked)
-
-GET /uploads/:file – static file (public)
-
-ONLYOFFICE
-
-GET /onlyoffice/config/:id – returns signed editor config (protected; admin/editor/viewer)
-
-POST /onlyoffice/callback/:id – DS save callback (IP/JWT protected via secret)
-
-Troubleshooting
-{"message":"Authorization required"} in the editor tab
-
-Ensure the Document Server container was started with:
-
--e JWT_ENABLED=true
-
--e JWT_SECRET=mysecret123
-
-Ensure backend uses the same secret in .env:
-
-ONLYOFFICE_JWT_SECRET=mysecret123
-
-Ensure backend embeds config.token = jwt.sign(config, ONLYOFFICE_JWT_SECRET) and returns it.
-
-DocsAPI is not defined
-
-Wrong or unreachable api.js URL. Check:
-
-http://localhost:8080/web-apps/apps/api/documents/api.js loads in the browser.
-
-Port mapping is 8080:80, not 8085.
-
-The <script> must load before calling new DocsAPI.DocEditor(...).
-
-Blank page / about:blank when opening editor
-
-If opening in new window, create the window before awaiting fetch (popup blockers).
-
-Route-based editor (/editor/:id) avoids popup issues—recommended.
-
-Document Server cannot download the file or call back
-
-Container must reach backend:
-
-Use APP_PUBLIC_BASE=http://host.docker.internal:5000 (Windows/Mac).
-
-On Linux, run container with --add-host=host.docker.internal:host-gateway or use your host IP in APP_PUBLIC_BASE.
-
-Ensure backend serves /uploads statically and file exists.
-
-Callback fails (saves not reflected)
-
-Backend callback verifies JWT; ensure Document Server is sending it in the Authorization header (which it will when JWT_ENABLED=true and secrets match).
-
-Check backend logs to see the callback body and status.
-
-Ensure backend can write to /uploads and your DB Document.versions update is correct.
-
-Security Notes
-
-Do not commit real secrets. Use .env files.
-
-Restrict upload MIME types and max size (MAX_UPLOAD_SIZE).
-
-Validate permissions for edit/delete on the backend.
-
-Consider serving /uploads with auth if needed (currently public for simplicity).
-
-In production, put Document Server and API behind HTTPS.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Document Management Backend
-
-Stack: Node.js, Express, MongoDB (Mongoose)
-
-## Setup
-
-1. Copy `.env.example` to `.env` and fill values.
-2. Create `uploads/` and `versions/` directories in project root:
-   - mkdir uploads versions
-3. Install dependencies:
-   - npm install
-4. Run in development:
-   - npm run dev
-
-## Endpoints (high level)
-
-- POST /api/auth/register
-- POST /api/auth/login
-- GET /api/documents            (list, with filters & pagination)
-- POST /api/documents/upload   (upload file)
-- GET /api/documents/:id       (metadata)
-- GET /api/documents/:id/download
-- PUT /api/documents/:id/rename
-- POST /api/documents/:id/replace  (upload replacement -> creates new version)
-- POST /api/documents/:id/restore-version  (restore previous version)
-- DELETE /api/documents/:id    (soft or hard delete by query param ?hard=true)
-- GET /api/documents/:id/versions
-
-Role enforcement:
-- admin: full CRUD
-- editor: upload + edit (replace/rename)
-- viewer: read only
-
-## Notes
-
-- Inline editor integration: frontend should open files (download URL), allow editing using OnlyOffice/TinyMCE+plugin, then POST the updated file to `replace` endpoint (which will create a new version and update metadata).
+  - **Do not commit secrets:** Always use `.env` files and add them to your `.gitignore`.
+  - **Input Validation:** Restrict file uploads by MIME type and maximum size.
+  - **Server-side Validation:** Always validate user permissions (roles) for sensitive actions like editing or deleting documents on the backend.
+  - **Production Security:** In a production environment, both your backend API and the ONLYOFFICE Document Server should be secured with **HTTPS**.
