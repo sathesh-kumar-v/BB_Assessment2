@@ -16,7 +16,7 @@ export default function Editor() {
 
   // ✅ use environment variable for backend API
   const API_BASE =
-    import.meta.env.VITE_API_URL || "http://localhost:5000";
+    import.meta.env.VITE_API_URL || "https://bb-assessment2.onrender.com";
     console.log("API_BASE =>", API_BASE);
 console.log("ENV VAR =>", import.meta.env.VITE_API_URL);
 
