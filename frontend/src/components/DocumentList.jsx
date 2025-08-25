@@ -42,7 +42,7 @@ export default function DocumentList({ documents, setDocuments, userRole }) {
   };
 
   const handleView = (doc) => {
-    window.open(`http://localhost:5000${doc.path}`, "_blank");
+    window.open(`https://bb-assessment2.onrender.com${doc.path}`, "_blank");
   };
 
   return (
