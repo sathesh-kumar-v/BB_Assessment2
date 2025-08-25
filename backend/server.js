@@ -17,7 +17,7 @@ const onlyofficeRoutes = require('./routes/onlyoffice.routes');
 connectDB();
 
 const allowedOrigins = [
-  'https://your-frontend.vercel.app',
+  'https://bb-assessment2-joaby0cw6-satheshkumars-projects-4dc0dbec.vercel.app/',
   'https://satheshkumar.duckdns.org/',
   // add any other admin/stage domains here
 ];
