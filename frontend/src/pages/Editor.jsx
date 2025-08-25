@@ -28,7 +28,6 @@ export default function Editor() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-            withCredentials: true,
           }
         );
 
