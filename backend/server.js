@@ -16,8 +16,17 @@ const onlyofficeRoutes = require('./routes/onlyoffice.routes');
 // connect DB
 connectDB();
 
+const allowedOrigins = [
+  'https://your-frontend.vercel.app',
+  'https://satheshkumar.duckdns.org/',
+  // add any other admin/stage domains here
+];
+
 // middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
