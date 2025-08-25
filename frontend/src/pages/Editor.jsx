@@ -14,16 +14,23 @@ export default function Editor() {
   // Determine mode based on role
   const mode = userRole === "viewer" ? "view" : "edit";
 
+  // ✅ use environment variable for backend API
+  const API_BASE =
+    import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
         const token = localStorage.getItem("token"); // stored at login
-        const res = await axios.get(`/api/onlyoffice/config/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${API_BASE}/api/onlyoffice/config/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
 
         // ✅ backend sends { config, token, docServerApiJs }
         setConfig(res.data.config);
@@ -34,7 +41,7 @@ export default function Editor() {
     };
 
     fetchConfig();
-  }, [id]);
+  }, [id, API_BASE]);
 
   useEffect(() => {
     if (config && docServerApiJs) {
