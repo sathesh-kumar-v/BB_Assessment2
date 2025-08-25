@@ -59,7 +59,7 @@ exports.getConfig = async (req, res) => {
     res.json({
       config,
       token,
-      docServerApiJs: `${baseUrl}/web-apps/apps/api/documents/api.js`
+      docServerApiJs: `${process.env.ONLYOFFICE_DS_URL}/web-apps/apps/api/documents/api.js`
     });
   } catch (err) {
     console.error(err);
@@ -137,10 +137,10 @@ exports.getEditorConfig = (req, res) => {
       fileType: file.extension,
       key: file._id.toString(),
       title: file.name,
-      url: `http://host.docker.internal:5000/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
     },
     editorConfig: {
-      callbackUrl: `http://host.docker.internal:5000/api/onlyoffice/callback/${file._id}`,
+     callbackUrl: `${baseUrl}/api/onlyoffice/callback/${file._id}`,
       user: {
         id: req.user._id.toString(),
         name: req.user.name
