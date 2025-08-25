@@ -18,8 +18,8 @@ exports.getConfig = async (req, res) => {
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    // ✅ Make sure APP_PUBLIC_BASE is host.docker.internal:5000
-    const baseUrl = process.env.APP_PUBLIC_BASE;
+    // Base URL of your backend (Render deployment)
+    const baseUrl = process.env.APP_PUBLIC_BASE || "https://bb-assessment2.onrender.com";
 
     const latestFile = doc.versions[doc.versions.length - 1];
     const fileUrlForDS = `${baseUrl}/uploads/${latestFile.filename}`;
@@ -55,10 +55,11 @@ exports.getConfig = async (req, res) => {
     config.document.jwt = token;
     config.editorConfig.token = token;
 
+    // 👉 Instead of exposing DuckDNS, point to backend proxy
     res.json({
       config,
       token,
-      docServerApiJs: `${process.env.ONLYOFFICE_DS_URL}/web-apps/apps/api/documents/api.js`
+      docServerApiJs: `${baseUrl}/onlyoffice/web-apps/apps/api/documents/api.js`
     });
   } catch (err) {
     console.error(err);
