@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
-import { createProxyMiddleware } from "http-proxy-middleware";
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
