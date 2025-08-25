@@ -59,7 +59,7 @@ exports.getConfig = async (req, res) => {
     res.json({
       config,
       token,
-      docServerApiJs: `${baseUrl}/onlyoffice/web-apps/apps/api/documents/api.js`
+      docServerApiJs: `${baseUrl}/web-apps/apps/api/documents/api.js`
     });
   } catch (err) {
     console.error(err);
