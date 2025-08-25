@@ -44,11 +44,11 @@ app.use(cors({
 app.use(
   "/onlyoffice/web-apps",
   createProxyMiddleware({
-    target: "https://satheshkumar.duckdns.org", // your OnlyOffice server
+    target: "https://satheshkumar.duckdns.org",
     changeOrigin: true,
-    pathRewrite: {
-      "^/onlyoffice": "", // remove /onlyoffice prefix
-    },
+    secure: false, // skip SSL validation if using self-signed certs, remove when LetsEncrypt works
+    pathRewrite: (path, req) => path.replace("^/onlyoffice", ""),
+    logLevel: "debug", // useful for Render logs
   })
 );
 
