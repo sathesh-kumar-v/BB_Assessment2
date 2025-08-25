@@ -21,10 +21,10 @@ const allowedOrigins = [
   'https://satheshkumar.duckdns.org/',
   // add any other admin/stage domains here
 ];
-
 // middleware
 app.use(cors({
   origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
 app.use(express.json());
@@ -32,8 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 // static file serving for uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/versions', express.static(path.join(__dirname, 'versions')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/versions', express.static(path.join(process.cwd(), 'versions')));
 
 // routes
 app.use('/api/auth', authRoutes);
