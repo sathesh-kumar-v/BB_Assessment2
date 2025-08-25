@@ -18,6 +18,8 @@ connectDB();
 
 const allowedOrigins = [
   'https://bb-assessment2-joaby0cw6-satheshkumars-projects-4dc0dbec.vercel.app',
+  'https://bb-assessment2-git-live-b3ad5f-satheshkumars-projects-4dc0dbec.vercel.app',
+  'https://bb-assessment2-rnvqh3t61-satheshkumars-projects-4dc0dbec.vercel.app',
   'https://satheshkumar.duckdns.org',
   'https://bb-assessment2.onrender.com'
   // add any other admin/stage domains here
