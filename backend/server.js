@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
@@ -38,6 +39,19 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true, // keep true (useful if later you add cookies), but won’t hurt
 }));
+
+// If you want to proxy the whole web-apps folder
+app.use(
+  "/onlyoffice/web-apps",
+  createProxyMiddleware({
+    target: "https://satheshkumar.duckdns.org", // your OnlyOffice server
+    changeOrigin: true,
+    pathRewrite: {
+      "^/onlyoffice": "", // remove /onlyoffice prefix
+    },
+  })
+);
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
