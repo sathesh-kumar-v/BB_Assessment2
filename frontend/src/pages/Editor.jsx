@@ -17,6 +17,8 @@ export default function Editor() {
   // ✅ use environment variable for backend API
   const API_BASE =
     import.meta.env.VITE_API_URL || "http://localhost:5000";
+    console.log("API_BASE =>", API_BASE);
+console.log("ENV VAR =>", import.meta.env.VITE_API_URL);
 
   useEffect(() => {
     const fetchConfig = async () => {
