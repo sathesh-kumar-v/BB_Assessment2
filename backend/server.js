@@ -17,8 +17,9 @@ const onlyofficeRoutes = require('./routes/onlyoffice.routes');
 connectDB();
 
 const allowedOrigins = [
-  'https://bb-assessment2-joaby0cw6-satheshkumars-projects-4dc0dbec.vercel.app/',
-  'https://satheshkumar.duckdns.org/',
+  'https://bb-assessment2-joaby0cw6-satheshkumars-projects-4dc0dbec.vercel.app',
+  'https://satheshkumar.duckdns.org',
+  'https://bb-assessment2.onrender.com'
   // add any other admin/stage domains here
 ];
 // middleware
